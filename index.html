@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mey AI - Twój Własny Model Sztucznej Inteligencji</title>
+    
+    <!-- CDNs for icons, charts, markdown parsing, and code syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <div class="logo-icon">M</div>
+                <div class="logo-text">
+                    <h1>Mey AI</h1>
+                    <span>Model Platform v1.0</span>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <a class="nav-item active" data-screen="chat">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>Czat z Mey</span>
+                </a>
+                <a class="nav-item" data-screen="training">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>Trening PyTorch</span>
+                </a>
+                <a class="nav-item" data-screen="knowledge">
+                    <i class="fa-solid fa-database"></i>
+                    <span>Baza Wiedzy RAG</span>
+                </a>
+                <a class="nav-item" data-screen="prompt">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Charakterystyka AI</span>
+                </a>
+            </nav>
+            
+            <!-- Quick Settings Panel -->
+            <div class="sidebar-section">
+                <h3 class="sidebar-section-title">Konfiguracja</h3>
+                
+                <div class="form-group">
+                    <label for="model-select">Wybierz model:</label>
+                    <select id="model-select" class="custom-select">
+                        <option value="mey:1.0" selected>Mey 1.0 (Standard)</option>
+                        <option value="mey:1.0-nano">Mey 1.0 Nano (Lite)</option>
+                        <option value="mey:pro">Mey 1.0 Pro (Web Search)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="temp-slider">Temperatura: <span id="temp-val">0.7</span></label>
+                    <input type="range" id="temp-slider" min="0.1" max="1.5" step="0.1" value="0.7" style="width:100%; accent-color:var(--primary);">
+                </div>
+                
+                <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; margin-top:8px;">
+                    <label for="rag-toggle" style="margin-bottom:0; cursor:pointer;">Baza Wiedzy (RAG):</label>
+                    <input type="checkbox" id="rag-toggle" style="width:18px; height:18px; cursor:pointer; accent-color:var(--primary);">
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header bar -->
+            <header class="app-header">
+                <div class="header-title">
+                    <h2 id="screen-title">Czat z Mey 1.0</h2>
+                </div>
+                <div class="header-status">
+                    <span>Status Systemu:</span>
+                    <div id="system-status-indicator" class="status-indicator offline"></div>
+                    <span id="system-status-text">Sprawdzanie...</span>
+                </div>
+            </header>
+            
+            <!-- SCREEN: CHAT -->
+            <div id="chat-screen" class="app-screen active">
+                <div class="chat-history" id="chat-history">
+                    <!-- Welcome screen -->
+                    <div class="chat-welcome" id="chat-welcome">
+                        <div class="welcome-icon"><i class="fa-solid fa-compass"></i></div>
+                        <h3>Witaj w Mey AI</h3>
+                        <p>
+                            Mey to Twój własny model sztucznej inteligencji. Możesz z nim rozmawiać w wersji standardowej (Mey 1.0),
+                            lekkiej (Mey 1.0 Nano) lub wytrenować własny model od zera na własnym tekście przy pomocy PyTorch i uruchomić go lokalnie.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="chat-input-container">
+                    <div class="chat-input-wrapper">
+                        <textarea id="chat-input" placeholder="Napisz wiadomość do Mey..." rows="1"></textarea>
+                        
+                        <div class="chat-input-actions">
+                            <button class="chat-input-btn" id="voice-input-btn" title="Dyktowanie (Mowa na tekst)">
+                                <i class="fa-solid fa-microphone"></i>
+                            </button>
+                            <button class="chat-input-btn" id="send-chat-btn" title="Wyślij">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="input-info-banner">
+                        <span id="active-model-display">Model: Mey 1.0</span>
+                        <span>
+                            <i class="fa-solid fa-shield-halved"></i> Uruchomiony w 100% lokalnie na Twoim komputerze
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SCREEN: PYTORCH TRAINING -->
+            <div id="training-screen" class="app-screen">
+                <div class="screen-layout">
+                    <!-- Left: Progress Logs and Charts -->
+                    <div class="dashboard-panel">
+                        <h3 class="panel-title"><i class="fa-solid fa-chart-line"></i> Postęp Treningu Modelu</h3>
+                        <div class="chart-container">
+                            <canvas id="lossChart"></canvas>
+                        </div>
+                        
+                        <h3 class="panel-title" style="margin-top:10px;"><i class="fa-solid fa-terminal"></i> Logi Konsoli Treningowej</h3>
+                        <div class="log-terminal" id="log-terminal">
+                            <div class="log-line info">Uruchom trening, aby zobaczyć proces nauki modelu w czasie rzeczywistym...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Parameters and Actions -->
+                    <div class="side-panel">
+                        <div class="glass-card">
+                            <h3 class="panel-title"><i class="fa-solid fa-gears"></i> Parametry Treningu</h3>
+                            <div class="hyperparams-grid">
+                                <div class="form-group">
+                                    <label for="train-dataset">Plik danych tekstowych:</label>
+                                    <input type="text" id="train-dataset" class="custom-input" value="data_pl.txt">
+                                </div>
+                                <div class="form-group">
+                                    <label for="train-iters">Iteracje treningu:</label>
+                                    <select id="train-iters" class="custom-select">
+                                        <option value="200">200 (Bardzo szybki)</option>
+                                        <option value="500" selected>500 (Zalecany)</option>
+                                        <option value="1000">1000 (Dokładny)</option>
+                                        <option value="2000">2000 (Długi)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="train-batch">Rozmiar paczki (Batch):</label>
+                                    <select id="train-batch" class="custom-select">
+                                        <option value="16">16</option>
+                                        <option value="32" selected>32</option>
+                                        <option value="64">64</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="train-block">Okno kontekstowe (Słowa):</label>
+                                    <select id="train-block" class="custom-select">
+                                        <option value="32">32</option>
+                                        <option value="64" selected>64</option>
+                                        <option value="128">128</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="train-embed">Wymiar osadzeń (Embedding):</label>
+                                    <select id="train-embed" class="custom-select">
+                                        <option value="64">64</option>
+                                        <option value="128" selected>128</option>
+                                        <option value="256">256</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="train-layers">Warstwy Transformera:</label>
+                                    <select id="train-layers" class="custom-select">
+                                        <option value="2">2 (Lite)</option>
+                                        <option value="4" selected>4 (Standard)</option>
+                                        <option value="6">6 (Deep)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card">
+                            <h3 class="panel-title"><i class="fa-solid fa-play"></i> Sterowanie Treningiem</h3>
+                            <button id="start-train-btn" class="btn-primary">
+                                <i class="fa-solid fa-graduation-cap"></i> Uruchom Trening
+                            </button>
+                            <button id="stop-train-btn" class="btn-danger" style="display:none; margin-top:12px;">
+                                <i class="fa-solid fa-circle-stop"></i> Zatrzymaj Trening
+                            </button>
+                            
+                            <div class="training-progress-container" id="training-progress-container" style="display:none;">
+                                <div class="progress-bar-wrapper">
+                                    <div id="progress-bar-fill" class="progress-bar-fill"></div>
+                                </div>
+                                <div class="progress-stats">
+                                    <span id="train-percent">0%</span>
+                                    <span id="train-loss-val">Loss: --</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SCREEN: RAG KNOWLEDGE BASE -->
+            <div id="knowledge-screen" class="app-screen">
+                <div class="knowledge-layout">
+                    <!-- Left: Upload & Document List -->
+                    <div style="display:flex; flex-direction:column; overflow:hidden;">
+                        <div class="upload-zone" id="upload-zone">
+                            <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                            <h4>Przeciągnij i upuść plik tekstowy</h4>
+                            <p>Obsługiwane formaty: .txt, .md. Pliki zostaną podzielone i zindeksowane wektorowo.</p>
+                            <input type="file" id="doc-file-input" style="display:none;" accept=".txt,.md">
+                        </div>
+                        
+                        <div class="documents-list-container">
+                            <h3 class="panel-title"><i class="fa-solid fa-file-invoice"></i> Zindeksowane Dokumenty</h3>
+                            <table class="documents-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nazwa pliku</th>
+                                        <th>Rozmiar</th>
+                                        <th>Fragmenty (Chunks)</th>
+                                        <th style="width: 80px;">Akcja</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="documents-table-body">
+                                    <!-- Dynamic rows -->
+                                    <tr>
+                                        <td colspan="4" style="text-align:center; color:var(--text-muted);">Brak dokumentów w bazie wiedzy. Wgraj plik powyżej.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Knowledge Stats -->
+                    <div class="side-panel">
+                        <div class="glass-card knowledge-stats-card">
+                            <h3 class="panel-title"><i class="fa-solid fa-chart-pie"></i> Statystyki Bazy</h3>
+                            
+                            <div class="stat-item">
+                                <span class="stat-label">Wgrane dokumenty:</span>
+                                <span class="stat-val" id="stats-doc-count">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Liczba wektorów (Chunks):</span>
+                                <span class="stat-val" id="stats-chunk-count">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Model Embeddings:</span>
+                                <span class="stat-val" id="stats-embed-model">qwen2.5:1.5b</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Typ wyszukiwania:</span>
+                                <span class="stat-val active" id="stats-search-type">Lokalny TF-IDF</span>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card">
+                            <h3 class="panel-title"><i class="fa-solid fa-circle-question"></i> Jak działa RAG?</h3>
+                            <p style="font-size:13px; color:var(--text-secondary); line-height:1.6;">
+                                RAG (Retrieval-Augmented Generation) pozwala modelowi na wstrzykiwanie odpowiednich informacji z Twoich dokumentów do jego okna kontekstowego przed udzieleniem odpowiedzi. 
+                                <br><br>
+                                Dzięki temu model działa tak, jakby był natychmiastowo wytrenowany na nowo wgranych plikach tekstowych.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SCREEN: SYSTEM PROMPT EDIT -->
+            <div id="prompt-screen" class="app-screen">
+                <div class="settings-layout">
+                    <div class="glass-card" style="width: 100%;">
+                        <h3 class="panel-title"><i class="fa-solid fa-sliders"></i> Osobowość i Prompt Systemowy</h3>
+                        <p style="color:var(--text-secondary); font-size:14px; margin-bottom:20px; line-height:1.5;">
+                            Prompt systemowy instruuje model o tym, kim jest i jak ma się zachowywać. Zmieniając tę instrukcję, możesz nadać modelowi Mey zupełnie inny charakter (np. złośliwy pirat, ekspert programowania, asystent nauczyciela).
+                        </p>
+                        
+                        <div class="form-group">
+                            <label for="system-prompt-input">Prompt Systemowy:</label>
+                            <textarea id="system-prompt-input" placeholder="Wpisz instrukcję systemową dla Mey..."></textarea>
+                        </div>
+                        
+                        <button id="save-prompt-btn" class="btn-primary" style="max-width: 250px;">
+                            <i class="fa-solid fa-floppy-disk"></i> Zastosuj Prompt
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <!-- Add languages support for Prism -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    
+    <script src="app.js"></script>
+</body>
+</html>
